@@ -1,6 +1,7 @@
 vim.cmd [[
   augroup langkeeper
     command! LangkeeperGetToken :lua print(require("langkeeper").get_session_token())
+    command! LangkeeperConfig :exe 'edit '.stdpath('config').'/langkeeper.json'
   augroup END
 ]]
 

@@ -2,9 +2,9 @@
 
 ## Configuration
 
-Configuration file is located in `~/.config/nvim/langkeeper.json`
+Configuration file is located in `~/.config/nvim/langkeeper.json`, you can open this file via `:LangkeeperConfig` command.
 
-Params
+Configuration parameters
 
 ```json
 {
