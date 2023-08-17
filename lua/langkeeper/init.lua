@@ -30,6 +30,9 @@ local function try_to_login()
     headers = {
       ["Content-Type"] = "application/json"
     },
+    raw = {
+      "-k"
+    },
     timeout = 1000,
     on_error = function(_)
     end
@@ -61,6 +64,13 @@ end
 
 
 module.ping = function(file_extension)
+  local config = require("langkeeper.config")
+
+  if not config.get("address") then
+    print("Langkeeper: Please set your server address")
+    return false
+  end
+
   if not module.get_session_token() then
     if try_to_login() == false then
       return false
@@ -69,7 +79,7 @@ module.ping = function(file_extension)
 
   local curl = require "plenary.curl"
 
-  local url = "http://localhost:8000/languages/ping"
+  local url = config.get("address") .. "/languages/ping"
   local body = {
     extension = file_extension,
   }
@@ -79,6 +89,9 @@ module.ping = function(file_extension)
       url = url,
       body = vim.fn.json_encode(body),
       timeout = 1000,
+      raw = {
+        "-k"
+      },
       headers = {
         ["Content-Type"] = "application/json",
         ["Cookie"] = "id=" .. module.get_session_token()
