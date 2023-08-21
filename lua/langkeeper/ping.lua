@@ -1,6 +1,7 @@
-return function(file_extension)
+return function(override_file_extension)
   local config = require "langkeeper.config"
 
+  local file_extension = override_file_extension or vim.fn.expand("%:e")
   if not file_extension or file_extension == "" then
     return false
   end

@@ -16,37 +16,41 @@ module.ping = require "langkeeper.ping"
 module.setup = function()
   -- AUTOCOMMANDS
 
+  -- When the cursor is idle, ping the server, depends on `updatetime`
   vim.api.nvim_create_autocmd("CursorHold",
     {
       callback = function()
-        module.ping(vim.fn.expand("%:e"))
+        module.ping()
       end,
       group = augroup
     }
   )
 
+  -- When the buffer is written, ping the server
   vim.api.nvim_create_autocmd("BufWritePost",
     {
       callback = function()
-        module.ping(vim.fn.expand("%:e"))
+        module.ping()
       end,
       group = augroup
     }
   )
 
-  vim.api.nvim_create_autocmd("BufEnter",
-    {
-      callback = function()
-        module.ping(vim.fn.expand("%:e"))
-      end,
-      group = augroup
-    }
-  )
-
+  -- When a new file is created, ping the server
   vim.api.nvim_create_autocmd("BufNewFile",
     {
       callback = function()
-        module.ping(vim.fn.expand("%:e"))
+        module.ping()
+      end,
+      group = augroup
+    }
+  )
+
+  -- When the buffer is entered, ping the server
+  vim.api.nvim_create_autocmd("BufEnter",
+    {
+      callback = function()
+        module.ping()
       end,
       group = augroup
     }
