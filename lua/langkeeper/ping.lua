@@ -1,6 +1,5 @@
 return function(file_extension)
   local config = require "langkeeper.config"
-  local module = require "langkeeper"
 
   if not file_extension then
     return false
@@ -10,8 +9,10 @@ return function(file_extension)
     return false
   end
 
-  if not module.get_session_token() then
-    if require "langkeeper.login" == false then
+  local get_session_token = require "langkeeper".get_session_token
+
+  if not get_session_token() then
+    if require "langkeeper.login" () == false then
       return false
     end
   end
@@ -23,33 +24,30 @@ return function(file_extension)
     extension = file_extension,
   }
 
-  print(module.get_session_token())
+  local res = curl.post(
+    {
+      url = url,
+      body = vim.fn.json_encode(body),
+      timeout = 1000,
+      raw = {
+        "-k"
+      },
+      headers = {
+        ["Content-Type"] = "application/json",
+        ["Cookie"] = "id=" .. get_session_token()
+      },
+      on_error = function(_)
+      end
+    }
+  )
 
+  if res.status == 401 then
+    print("Langkeeper: Invalid credentials")
+    return false
+  end
 
-  -- local res = curl.post(
-  --   {
-  --     url = url,
-  --     body = vim.fn.json_encode(body),
-  --     timeout = 1000,
-  --     raw = {
-  --       "-k"
-  --     },
-  --     headers = {
-  --       ["Content-Type"] = "application/json",
-  --       ["Cookie"] = "id=" .. module.get_session_token()
-  --     },
-  --     on_error = function(_)
-  --     end
-  --   }
-  -- )
-  --
-  -- if res.status == 401 then
-  --   print("Langkeeper: Invalid credentials")
-  --   return false
-  -- end
-  --
-  -- if res.status ~= 200 then
-  --   print("Langkeeper: Failed to contact the server")
-  --   return false
-  -- end
+  if res.status ~= 200 and res.status ~= 204 then
+    print("Langkeeper: Failed to contact the server")
+    return false
+  end
 end

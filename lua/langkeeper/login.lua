@@ -1,6 +1,6 @@
 return function()
-  local curl = require("plenary.curl")
-  local config = require("langkeeper.config")
+  local curl = require "plenary.curl"
+  local config = require "langkeeper.config"
 
   if not config.get("address") then
     print("Langkeeper: Please set your server address")
@@ -42,7 +42,19 @@ return function()
     return false
   end
 
-  local set_cookie = res.headers[2]
+  local set_cookie = nil
+  for _, cookie in ipairs(res.headers) do
+    if string.match(cookie, "id=") then
+      set_cookie = cookie
+      break
+    end
+  end
+
+  if not set_cookie then
+    print("Langkeeper: Failed to get authentication cookie")
+    return false
+  end
+
   local session_token = string.match(set_cookie, "id=([^;]+)")
 
   require "langkeeper".set_session_token(session_token)
