@@ -3,6 +3,14 @@ local module = {}
 module.setup = function()
 end
 
+module.set_session_token = function(session_token)
+  vim.g.langkeeper_session_token = session_token
+end
+
+module.get_session_token = function()
+  return vim.g.langkeeper_session_token
+end
+
 local function try_to_login()
   local curl = require("plenary.curl")
 
@@ -48,20 +56,24 @@ local function try_to_login()
     return false
   end
 
-  local set_cookie = res.headers[2]
+  local set_cookie = nil
+
+  for _, cookie in ipairs(res.headers) do
+    if string.find(cookie, "set-cookie") then
+      set_cookie = cookie
+      break
+    end
+  end
+
+  if not set_cookie then
+    print("Langkeeper: Failed to contact the server")
+    return false
+  end
+
   local session_token = string.match(set_cookie, "id=([^;]+)")
 
-  require "langkeeper".set_session_token(session_token)
+  module.set_session_token(session_token)
 end
-
-module.set_session_token = function(session_token)
-  vim.g.langkeeper_session_token = session_token
-end
-
-module.get_session_token = function()
-  return vim.g.langkeeper_session_token
-end
-
 
 module.ping = function(file_extension)
   local config = require("langkeeper.config")
