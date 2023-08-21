@@ -1,7 +1,7 @@
 return function(file_extension)
   local config = require "langkeeper.config"
 
-  if not file_extension then
+  if not file_extension or file_extension == "" then
     return false
   end
 
