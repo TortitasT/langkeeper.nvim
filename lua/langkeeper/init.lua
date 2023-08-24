@@ -17,14 +17,14 @@ module.setup = function()
   -- AUTOCOMMANDS
 
   -- When the cursor is idle, ping the server, depends on `updatetime`
-  vim.api.nvim_create_autocmd("CursorHold",
-    {
-      callback = function()
-        module.ping()
-      end,
-      group = augroup
-    }
-  )
+  -- vim.api.nvim_create_autocmd("CursorHold",
+  --   {
+  --     callback = function()
+  --       module.ping()
+  --     end,
+  --     group = augroup
+  --   }
+  -- )
 
   -- When the buffer is written, ping the server
   vim.api.nvim_create_autocmd("BufWritePost",
@@ -51,6 +51,18 @@ module.setup = function()
     {
       callback = function()
         module.ping()
+
+        Recursive_ping = function()
+          module.ping()
+
+          vim.defer_fn(function()
+            Recursive_ping()
+          end, 60000)
+        end
+
+        vim.defer_fn(function()
+          Recursive_ping()
+        end, 60000)
       end,
       group = augroup
     }
