@@ -25,6 +25,17 @@ module.setup = function()
   --     group = augroup
   --   }
   -- )
+  Recursive_ping = function()
+    module.ping()
+
+    vim.defer_fn(function()
+      Recursive_ping()
+    end, 60000)
+  end
+
+  vim.defer_fn(function()
+    Recursive_ping()
+  end, 60000)
 
   -- When the buffer is written, ping the server
   vim.api.nvim_create_autocmd("BufWritePost",
@@ -51,18 +62,6 @@ module.setup = function()
     {
       callback = function()
         module.ping()
-
-        Recursive_ping = function()
-          module.ping()
-
-          vim.defer_fn(function()
-            Recursive_ping()
-          end, 60000)
-        end
-
-        vim.defer_fn(function()
-          Recursive_ping()
-        end, 60000)
       end,
       group = augroup
     }
