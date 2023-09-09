@@ -25,23 +25,27 @@ return function(override_file_extension)
     extension = file_extension,
   }
 
-  local res = curl.post(
-    {
-      url = url,
-      body = vim.fn.json_encode(body),
-      timeout = 1000,
-      raw = {
-        "-k"
-      },
-      compressed = false,
-      headers = {
-        ["Content-Type"] = "application/json",
-        ["Cookie"] = "id=" .. get_session_token()
-      },
-      on_error = function(_)
-      end
-    }
-  )
+  local opts = {
+    url = url,
+    body = vim.fn.json_encode(body),
+    timeout = 1000,
+    raw = {
+      "-k"
+    },
+    compressed = true,
+    headers = {
+      ["Content-Type"] = "application/json",
+      ["Cookie"] = "id=" .. get_session_token()
+    },
+    on_error = function(_)
+    end
+  }
+
+  if vim.fn.has("win32") == 1 then
+    opts.compressed = false
+  end
+
+  local res = curl.post(opts)
 
   if res.status == 401 then
     print("Langkeeper: Invalid credentials")

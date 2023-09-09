@@ -18,7 +18,7 @@ return function()
     password = config.get("password")
   }
 
-  local res = curl.post({
+  local opts = {
     url = url,
     body = vim.fn.json_encode(body),
     headers = {
@@ -27,11 +27,17 @@ return function()
     raw = {
       "-k"
     },
-    compressed = false,
+    compressed = true,
     timeout = 1000,
     on_error = function(_)
     end
-  })
+  }
+
+  if vim.fn.has("win32") == 1 then
+    opts.compressed = false
+  end
+
+  local res = curl.post(opts)
 
   if res.status == 401 then
     print("Langkeeper: Invalid credentials")
