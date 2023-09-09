@@ -27,6 +27,7 @@ return function()
     raw = {
       "-k"
     },
+    compressed = false,
     timeout = 1000,
     on_error = function(_)
     end

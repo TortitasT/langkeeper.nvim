@@ -33,6 +33,7 @@ return function(override_file_extension)
       raw = {
         "-k"
       },
+      compressed = false,
       headers = {
         ["Content-Type"] = "application/json",
         ["Cookie"] = "id=" .. get_session_token()
