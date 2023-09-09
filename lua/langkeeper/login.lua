@@ -40,6 +40,7 @@ return function()
 
   if res.status ~= 200 then
     print("Langkeeper: Failed to contact the server")
+    print(res.body)
     return false
   end
 
