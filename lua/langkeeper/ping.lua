@@ -54,6 +54,7 @@ return function(override_file_extension)
 
   if res.status ~= 200 and res.status ~= 204 then
     print("Langkeeper: Failed to contact the server")
+    print(res.body)
     return false
   end
 end
