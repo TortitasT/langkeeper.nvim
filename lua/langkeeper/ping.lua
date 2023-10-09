@@ -18,43 +18,60 @@ return function(override_file_extension)
     end
   end
 
-  local curl = require "plenary.curl"
 
   local url = config.get("address") .. "/languages/ping"
   local body = {
     extension = file_extension,
   }
 
-  local opts = {
-    url = url,
-    body = vim.fn.json_encode(body),
-    timeout = 1000,
-    raw = {
-      "-k"
+  vim.loop.spawn("curl", {
+    args = {
+      "-k",
+      "-X",
+      "POST",
+      "-H",
+      "Content-Type: application/json",
+      "-H",
+      "Cookie: id=" .. get_session_token(),
+      "-d",
+      vim.fn.json_encode(body),
+      url,
     },
-    compressed = true,
-    headers = {
-      ["Content-Type"] = "application/json",
-      ["Cookie"] = "id=" .. get_session_token()
-    },
-    on_error = function(_)
-    end
-  }
+    stdio = { nil, nil, nil },
+  }, function(_, _, _)
+  end)
 
-  if vim.fn.has("win32") == 1 then
-    opts.compressed = false
-  end
+  -- local curl = require "plenary.curl"
+  -- local opts = {
+  --   url = url,
+  --   body = vim.fn.json_encode(body),
+  --   timeout = 1000,
+  --   raw = {
+  --     "-k"
+  --   },
+  --   compressed = true,
+  --   headers = {
+  --     ["Content-Type"] = "application/json",
+  --     ["Cookie"] = "id=" .. get_session_token()
+  --   },
+  --   on_error = function(_)
+  --   end
+  -- }
 
-  local res = curl.post(opts)
+  -- if vim.fn.has("win32") == 1 then
+  --   opts.compressed = false
+  -- end
 
-  if res.status == 401 then
-    print("Langkeeper: Invalid credentials")
-    return false
-  end
-
-  if res.status ~= 200 and res.status ~= 204 then
-    print("Langkeeper: Failed to contact the server")
-    print(res.body)
-    return false
-  end
+  -- local res = curl.post(opts)
+  --
+  -- if res.status == 401 then
+  --   print("Langkeeper: Invalid credentials")
+  --   return false
+  -- end
+  --
+  -- if res.status ~= 200 and res.status ~= 204 then
+  --   print("Langkeeper: Failed to contact the server")
+  --   print(res.body)
+  --   return false
+  -- end
 end
