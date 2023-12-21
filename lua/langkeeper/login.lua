@@ -30,6 +30,9 @@ return function()
     compressed = true,
     timeout = 1000,
     on_error = function(_)
+    end,
+    on_success = function(res)
+      print(res)
     end
   }
 
