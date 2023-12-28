@@ -2,7 +2,7 @@ local PATH_SECRETS = vim.fn.stdpath("data") .. "/langkeeper_secrets.json"
 local PATH_CONFIG = vim.fn.stdpath("config") .. "/langkeeper.json"
 
 local read_items = function(path)
-  local file = io.open(path, "w")
+  local file = io.open(path, "r")
 
   local contents = "[]"
 
@@ -11,7 +11,17 @@ local read_items = function(path)
     file:close()
   end
 
-  return vim.fn.json_decode(contents)
+  local err, json = pcall(vim.fn.json_decode, contents)
+
+  if err == false then
+    return nil
+  end
+
+  if json == nil then
+    return nil
+  end
+
+  return json
 end
 
 local find_item = function(path, key)

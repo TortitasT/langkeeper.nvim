@@ -64,6 +64,5 @@ return function()
   end
 
   local session_token = string.match(set_cookie, "id=([^;]+)")
-
   require "langkeeper".set_session_token(session_token)
 end
