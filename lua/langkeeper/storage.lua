@@ -1,9 +1,9 @@
-local module = {}
+local PATH_SECRETS = vim.fn.stdpath("data") .. "/langkeeper_secrets.json"
+local PATH_CONFIG = vim.fn.stdpath("config") .. "/langkeeper.json"
 
-local secrets_path = vim.fn.stdpath("data") .. "/langkeeper_secrets.json"
+local read_items = function(path)
+  local file = io.open(path, "w")
 
-module.read_secrets = function()
-  local file = io.open(secrets_path, "r")
   local contents = "[]"
 
   if file ~= nil then
@@ -14,45 +14,63 @@ module.read_secrets = function()
   return vim.fn.json_decode(contents)
 end
 
-module.find_secret = function(key)
-  local secrets = module.read_secrets()
+local find_item = function(path, key)
+  local configs = read_items(path)
 
-  if secrets == nil then
+  if configs == nil then
     return nil, nil
   end
 
-  for i, s in pairs(secrets) do
-    if s.key == key then
-      return i, s
+  for i, c in pairs(configs) do
+    if c.key == key then
+      return i, c
     end
   end
 
   return nil, nil
 end
 
-module.store_secret = function(secret)
-  local file = io.open(secrets_path, "w")
-  local secrets = module.read_secrets()
+local store_item = function(path, item)
+  local file = io.open(path, "w")
+  local configs = read_items(path)
 
   if file == nil then
     return false
   end
 
-  if secrets == nil then
-    secrets = {}
+  if configs == nil then
+    configs = {}
   end
 
-  local found_index, _ = module.find_secret(secret.key)
+  local found_index, _ = find_item(item.key)
   if found_index ~= nil then
-    secrets[found_index] = secret
+    configs[found_index] = item
   else
-    table.insert(secrets, secret)
+    table.insert(configs, item)
   end
 
-  file:write(vim.fn.json_encode(secrets))
+  file:write(vim.fn.json_encode(configs))
   file:close()
 
   return true
 end
 
-return module
+local M = {}
+
+M.find_config = function(key)
+  return find_item(PATH_CONFIG, key)
+end
+
+M.store_config = function(config)
+  return store_item(PATH_CONFIG, config)
+end
+
+M.find_secret = function(key)
+  return find_item(PATH_SECRETS, key)
+end
+
+M.store_secret = function(secret)
+  return store_item(PATH_SECRETS, secret)
+end
+
+return M
