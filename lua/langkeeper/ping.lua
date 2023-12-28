@@ -18,15 +18,49 @@ return function(override_file_extension)
     end
   end
 
-
   local url = config.get("address") .. "/languages/ping"
   local body = {
     extension = file_extension,
   }
 
-  vim.loop.spawn("curl", {
+  -- THANKS!! https://teukka.tech/vimloop.html
+
+  local results = {}
+  local function onread(err, data)
+    if err then
+      -- print('ERROR: ', err)
+      -- TODO handle err
+    end
+    if data then
+      local vals = vim.split(data, "\n")
+      for _, d in pairs(vals) do
+        if d == "" then goto continue end
+        table.insert(results, d)
+        ::continue::
+      end
+    end
+  end
+
+  local doLoginIfNeeded = function()
+    if not results[1] then
+      return false
+    end
+
+    if string.find(results[1], "401") then
+      if require "langkeeper.login" () == false then
+        return false
+      end
+    end
+  end
+
+  local stdout = vim.loop.new_pipe(false)
+  local stderr = vim.loop.new_pipe(false)
+  local stdio = { nil, stdout, stderr }
+
+  handle = vim.loop.spawn("curl", {
     args = {
       "-k",
+      '-w "%{http_code}"',
       "-X",
       "POST",
       "-H",
@@ -37,41 +71,17 @@ return function(override_file_extension)
       vim.fn.json_encode(body),
       url,
     },
-    stdio = { nil, nil, nil },
+    stdio = stdio,
   }, function(_, _, _)
+    stdout:read_stop()
+    stderr:read_stop()
+    stdout:close()
+    stderr:close()
+    handle:close()
+
+    doLoginIfNeeded()
   end)
 
-  -- local curl = require "plenary.curl"
-  -- local opts = {
-  --   url = url,
-  --   body = vim.fn.json_encode(body),
-  --   timeout = 1000,
-  --   raw = {
-  --     "-k"
-  --   },
-  --   compressed = true,
-  --   headers = {
-  --     ["Content-Type"] = "application/json",
-  --     ["Cookie"] = "id=" .. get_session_token()
-  --   },
-  --   on_error = function(_)
-  --   end
-  -- }
-
-  -- if vim.fn.has("win32") == 1 then
-  --   opts.compressed = false
-  -- end
-
-  -- local res = curl.post(opts)
-  --
-  -- if res.status == 401 then
-  --   print("Langkeeper: Invalid credentials")
-  --   return false
-  -- end
-  --
-  -- if res.status ~= 200 and res.status ~= 204 then
-  --   print("Langkeeper: Failed to contact the server")
-  --   print(res.body)
-  --   return false
-  -- end
+  vim.loop.read_start(stdout, onread) -- TODO implement onread handler
+  -- vim.loop.read_start(stderr, onread)
 end

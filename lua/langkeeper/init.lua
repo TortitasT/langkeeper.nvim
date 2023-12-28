@@ -3,11 +3,20 @@ local augroup = vim.api.nvim_create_augroup("langkeeper", { clear = true })
 local module = {}
 
 module.set_session_token = function(session_token)
-  vim.g.langkeeper_session_token = session_token
+  require "langkeeper.storage".store_secret({
+    key = "langkeeper_session_token",
+    value = session_token
+  })
 end
 
 module.get_session_token = function()
-  return vim.g.langkeeper_session_token
+  local _, token = require "langkeeper.storage".find_secret("langkeeper_session_token")
+
+  if token == nil then
+    return nil
+  end
+
+  return token.value
 end
 
 module.login = require "langkeeper.login"
