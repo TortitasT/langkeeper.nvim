@@ -4,7 +4,6 @@ local secrets_path = vim.fn.stdpath("data") .. "/langkeeper_secrets.json"
 
 module.read_secrets = function()
   local file = io.open(secrets_path, "r")
-
   local contents = "[]"
 
   if file ~= nil then

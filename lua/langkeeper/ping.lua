@@ -46,10 +46,10 @@ return function(override_file_extension)
       return false
     end
 
-    if string.find(results[1], "401") then
-      if require "langkeeper.login" () == false then
-        return false
-      end
+    local response = results[1]
+
+    if string.find(response, '"401"') then
+      require "langkeeper.login" ()
     end
   end
 
@@ -79,6 +79,7 @@ return function(override_file_extension)
     stderr:close()
     handle:close()
 
+    -- When curl is done, check if we need to login again based on the response stored in results
     doLoginIfNeeded()
   end)
 
