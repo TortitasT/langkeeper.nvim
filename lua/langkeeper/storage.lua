@@ -11,9 +11,9 @@ local read_items = function(path)
     file:close()
   end
 
-  local err, json = pcall(vim.fn.json_decode, contents)
+  local succeeds, json = pcall(vim.fn.json_decode, contents)
 
-  if err == false then
+  if succeeds == false then
     return nil
   end
 
