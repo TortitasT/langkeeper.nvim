@@ -77,7 +77,9 @@ return function(override_file_extension)
     stderr:read_stop()
     stdout:close()
     stderr:close()
-    handle:close()
+    pcall(function()
+      handle:close()
+    end)
 
     -- When curl is done, check if we need to login again based on the response stored in results
     doLoginIfNeeded()
