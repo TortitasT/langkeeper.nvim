@@ -8,11 +8,15 @@ module.get = function(key)
   local file = io.open(config_file, "r")
   if file then
     local contents = file:read("*a")
-    config = vim.fn.json_decode(contents)
+    local succeeds, json = pcall(vim.fn.json_decode, contents)
+    if succeeds then
+      config = json
+    end
+
     file:close()
   end
 
-  return config[key]
+  return config[key] or nil
 end
 
 return module
